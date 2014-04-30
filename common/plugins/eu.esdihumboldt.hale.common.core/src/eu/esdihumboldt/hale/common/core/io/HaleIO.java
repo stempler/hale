@@ -304,10 +304,35 @@ public abstract class HaleIO {
 	 */
 	public static <P extends IOProvider> IContentType findContentType(Class<P> providerType,
 			InputSupplier<? extends InputStream> in, String filename) {
+		return findContentType(providerType, in, filename, null);
+	}
+
+	/**
+	 * Find the content type for the given input
+	 * 
+	 * @param <P> the provider interface type
+	 * 
+	 * @param providerType the provider type, usually an interface
+	 * @param in the input supplier to use for testing, may be <code>null</code>
+	 *            if the file name is not <code>null</code>
+	 * @param filename the file name, may be <code>null</code> if the input
+	 *            supplier is not <code>null</code>
+	 * @param additionalSupportedTypes optional additional supported types, that
+	 *            should be checked in any case, even if there is no provider
+	 *            available for the specific type
+	 * @return the content type or <code>null</code> if no matching content type
+	 *         is found
+	 */
+	public static <P extends IOProvider> IContentType findContentType(Class<P> providerType,
+			InputSupplier<? extends InputStream> in, String filename,
+			Collection<? extends IContentType> additionalSupportedTypes) {
 		Collection<IOProviderDescriptor> providers = getProviderFactories(providerType);
 
 		// collect supported content types
 		Set<IContentType> supportedTypes = new HashSet<IContentType>();
+		if (additionalSupportedTypes != null) {
+			supportedTypes.addAll(additionalSupportedTypes);
+		}
 		for (IOProviderDescriptor factory : providers) {
 			supportedTypes.addAll(factory.getSupportedTypes());
 		}
