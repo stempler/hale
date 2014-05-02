@@ -72,7 +72,7 @@ public abstract class AbstractGeoInstanceWriter extends AbstractInstanceWriter i
 			try {
 				// TODO cache mathtransforms?
 				MathTransform transform = CRS.findMathTransform(sourceCrs.getCRS(), getTargetCRS()
-						.getCRS());
+						.getCRS(), true);
 				Geometry targetGeometry = JTS.transform(geom, transform);
 				return new Pair<>(targetGeometry, getTargetCRS());
 			} catch (Exception e) {
