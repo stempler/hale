@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 import de.fhg.igd.slf4jplus.ALogger;
 import de.fhg.igd.slf4jplus.ALoggerFactory;
@@ -38,6 +40,7 @@ import eu.esdihumboldt.hale.common.align.custom.DefaultCustomFunctionExplanation
 import eu.esdihumboldt.hale.common.align.custom.DefaultCustomPropertyFunction;
 import eu.esdihumboldt.hale.common.core.io.Value;
 import eu.esdihumboldt.hale.ui.HaleWizardPage;
+import eu.esdihumboldt.hale.ui.common.CommonSharedImages;
 import eu.esdihumboldt.hale.ui.functions.custom.CustomPropertyFunctionWizard;
 
 /**
@@ -81,6 +84,10 @@ public class CustomFunctionExplanationPage extends HaleWizardPage<CustomProperty
 	private TabFolder tabFolder;
 
 	private final Map<Locale, TabGroup> tabs = new HashMap<>();
+
+	private ToolItem removeLanguage;
+
+	private ToolBar toolbar;
 
 	/**
 	 * Default constructor.
@@ -151,17 +158,19 @@ public class CustomFunctionExplanationPage extends HaleWizardPage<CustomProperty
 		}
 
 		// right part - controls
-		Composite actions = new Composite(main, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(false, true).applyTo(actions);
-		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(actions);
+		toolbar = new ToolBar(main, SWT.VERTICAL | SWT.WRAP | SWT.FLAT);
+		GridDataFactory.fillDefaults().grab(false, true).applyTo(toolbar);
 
 		// TODO add a language
-//		Button addLanguage = new Button(actions, SWT.PUSH | SWT.FLAT);
-//		addLanguage.setImage(CommonSharedImages.getImageRegistry().get(CommonSharedImages.IMG_ADD));
-//		addLanguage.setToolTipText("Add another explanation language");
+		final ToolItem addLanguage = new ToolItem(toolbar, SWT.PUSH);
+		addLanguage.setImage(CommonSharedImages.getImageRegistry().get(CommonSharedImages.IMG_ADD));
+		addLanguage.setToolTipText("Add another explanation language");
 
 		// TODO remove a language (prevent removing default)
-
+		removeLanguage = new ToolItem(toolbar, SWT.PUSH);
+		removeLanguage
+				.setImage(CommonSharedImages.getImageRegistry().get(CommonSharedImages.IMG_REMOVE));
+		removeLanguage.setToolTipText("Remove current language");
 	}
 
 	private void addTab(Locale locale, eu.esdihumboldt.hale.common.core.io.Text content) {
