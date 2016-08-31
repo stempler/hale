@@ -344,6 +344,35 @@
             </property>
          </sourceProperties>
       </propertyFunction>
+      <propertyFunction
+            category="eu.esdihumboldt.cst.functions.geometric"
+            cellExplanation="eu.esdihumboldt.cst.functions.geometric.AggregateLengthExplanation"
+            description="Aggregate the lengths of provided geometries."
+            icon="icons/geometry.png"
+            identifier="eu.esdihumboldt.cst.functions.geometric.calculatelength.aggregate"
+            name="Aggregate Length">
+         <targetProperties>
+            <property
+                  description="The property that shall hold the calculated length"
+                  maxOccurrence="1"
+                  minOccurrence="1">
+               <bindingCondition
+                     allowCollection="false"
+                     allowConversion="true"
+                     compatibleClass="java.lang.Double">
+               </bindingCondition>
+            </property>
+         </targetProperties>
+         <sourceProperties>
+            <property
+                  description="The geometries used to calculate the length"
+                  eager="true"
+                  maxOccurrence="*"
+                  minOccurrence="1">
+               <geometryOrParentCondition></geometryOrParentCondition>
+            </property>
+         </sourceProperties>
+      </propertyFunction>
    </extension>
    <extension
          point="eu.esdihumboldt.hale.align.transformation">
@@ -400,6 +429,12 @@
             engine="eu.esdihumboldt.align.java"
             function="eu.esdihumboldt.cst.functions.geometric.interiorPoint"
             id="eu.esdihumboldt.cst.functions.geometric.interiorPoint">
+      </propertyTransformation>
+      <propertyTransformation
+            class="eu.esdihumboldt.cst.functions.geometric.AggregateLength"
+            engine="eu.esdihumboldt.align.java"
+            function="eu.esdihumboldt.cst.functions.geometric.calculatelength.aggregate"
+            id="eu.esdihumboldt.cst.functions.geometric.calculatelength.aggregate">
       </propertyTransformation>
    </extension>
    <extension

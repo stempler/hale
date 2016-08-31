@@ -1,0 +1,1 @@
+Berechnet die aggregierte Länge aller Quell-Geometrien und weist das Ergebnis dem Ziel-Attribut $_target zu.

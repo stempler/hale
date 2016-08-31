@@ -1,0 +1,1 @@
+Eagerly calculates the aggregated length of the source geometries and assigns the result to the $_target property.
