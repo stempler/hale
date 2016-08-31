@@ -16,8 +16,11 @@
 
 package eu.esdihumboldt.cst.functions.geometric;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.ListMultimap;
 import com.vividsolutions.jts.geom.Geometry;
@@ -39,9 +42,9 @@ import eu.esdihumboldt.hale.common.schema.geometry.GeometryProperty;
  * 
  * @author Kevin Mais
  */
-public class CalculateLength extends
-		AbstractSingleTargetPropertyTransformation<TransformationEngine> implements
-		CalculateLengthFunction {
+public class CalculateLength
+		extends AbstractSingleTargetPropertyTransformation<TransformationEngine>
+		implements CalculateLengthFunction {
 
 	/**
 	 * @see eu.esdihumboldt.hale.common.align.transformation.function.impl.AbstractSingleTargetPropertyTransformation#evaluate(java.lang.String,
@@ -61,27 +64,46 @@ public class CalculateLength extends
 		PropertyValue input = variables.get(null).get(0);
 		Object inputValue = input.getValue();
 
+		return calculateLength(Collections.singleton(inputValue), log);
+	}
+
+	/**
+	 * Calculates aggregated geometry length of geometries contained in the
+	 * provided objects.
+	 * 
+	 * @param geometries the geometries or instances containing geometries
+	 * @param log the transformation log or <code>null</code>
+	 * @return the calculated length
+	 * @throws NoResultException if no geometry to determine the length from
+	 *             could be found
+	 */
+	public static double calculateLength(Iterable<?> geometries, @Nullable TransformationLog log)
+			throws NoResultException {
 		// depth first traverser that on cancel continues traversal but w/o the
 		// children of the current object
 		InstanceTraverser traverser = new DepthFirstInstanceTraverser(true);
 
 		GeometryFinder geoFind = new GeometryFinder(null);
 
-		traverser.traverse(inputValue, geoFind);
+		for (Object geomHolder : geometries) {
+			traverser.traverse(geomHolder, geoFind);
+		}
 
 		List<GeometryProperty<?>> geoms = geoFind.getGeometries();
 
 		Geometry geom = null;
 
 		if (geoms.size() > 1) {
+			// TODO check if CRS is projected?
+			// TODO check/compare CRS axis units?
 
 			int length = 0;
 
 			for (GeometryProperty<?> geoProp : geoms) {
-				length += geoProp.getGeometry().getLength();
+				if (geoProp.getGeometry() != null) {
+					length += geoProp.getGeometry().getLength();
+				}
 			}
-
-			// TODO: warn ?!
 
 			return length;
 
@@ -94,10 +116,8 @@ public class CalculateLength extends
 			return geom.getLength();
 		}
 		else {
-			throw new TransformationException(
-					"Geometry for calculate length could not be retrieved.");
+			throw new NoResultException("Geometry for calculate length could not be retrieved.");
 		}
-
 	}
 
 }
