@@ -1556,5 +1556,12 @@
         "versions": {
             "0.9.8.i20151027": "0.9.8"
         }
+    },
+    "org.mongodb": {
+        "group": "org.mongodb",
+        "name": "mongo-java-driver",
+        "versions": {
+            "3.4.2.i20170517": "3.4.2"
+        }
     }
 }

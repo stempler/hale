@@ -374,6 +374,7 @@ HALE:
   - relaxngDatatype
   - schemacrawler.core
   - slf4j.ext
+  - org.mongodb
 
 AGeoBw:
   Extends: HALE

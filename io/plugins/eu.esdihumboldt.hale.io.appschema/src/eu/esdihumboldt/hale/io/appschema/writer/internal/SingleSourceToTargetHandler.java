@@ -52,8 +52,8 @@ public abstract class SingleSourceToTargetHandler implements TypeTransformationH
 		Entity targetType = targetEntities.values().iterator().next();
 		TypeDefinition targetTypeDef = targetType.getDefinition().getType();
 
-		FeatureTypeMapping ftMapping = context.getMappingWrapper().getOrCreateFeatureTypeMapping(
-				targetTypeDef);
+		FeatureTypeMapping ftMapping = context.getMappingWrapper()
+				.getOrCreateFeatureTypeMapping(targetTypeDef);
 		ftMapping.setSourceType(sourceType.getDefinition().getType().getName().getLocalPart());
 
 		return ftMapping;

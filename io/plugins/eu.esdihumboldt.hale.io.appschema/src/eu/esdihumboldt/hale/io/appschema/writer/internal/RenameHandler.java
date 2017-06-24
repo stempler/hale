@@ -18,6 +18,7 @@ package eu.esdihumboldt.hale.io.appschema.writer.internal;
 import eu.esdihumboldt.cst.functions.core.Rename;
 import eu.esdihumboldt.hale.common.align.model.Property;
 import eu.esdihumboldt.hale.io.appschema.writer.AppSchemaMappingUtils;
+import eu.esdihumboldt.hale.io.mongo.JsonPathConstraint;
 
 /**
  * Translates a property cell specifying an {@link Rename} transformation
@@ -33,8 +34,13 @@ public class RenameHandler extends AbstractPropertyTransformationHandler {
 	@Override
 	protected String getSourceExpressionAsCQL() {
 		Property source = AppSchemaMappingUtils.getSourceProperty(propertyCell);
-
 		String cqlExpression = source.getDefinition().getDefinition().getName().getLocalPart();
+		// apply MongoDB JSOn selection if needed
+		JsonPathConstraint jsonPath = source.getDefinition().getDefinition().getPropertyType()
+				.getConstraint(JsonPathConstraint.class);
+		if (jsonPath != null) {
+			cqlExpression = String.format("jsonSelect('%s')", jsonPath.getJsonPath());
+		}
 
 		return getConditionalExpression(source.getDefinition(), cqlExpression);
 	}
