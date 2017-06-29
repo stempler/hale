@@ -696,7 +696,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.mongodb"
+         id="eu.esdihumboldt.hale.io.mongo"
          download-size="0"
          install-size="0"
          version="0.0.0"
