@@ -36,10 +36,10 @@ public class RenameHandler extends AbstractPropertyTransformationHandler {
 		Property source = AppSchemaMappingUtils.getSourceProperty(propertyCell);
 		String cqlExpression = source.getDefinition().getDefinition().getName().getLocalPart();
 		// apply MongoDB JSOn selection if needed
-		JsonPathConstraint jsonPath = source.getDefinition().getDefinition().getPropertyType()
+		JsonPathConstraint jsonConstraint = source.getDefinition().getDefinition()
 				.getConstraint(JsonPathConstraint.class);
-		if (jsonPath != null) {
-			cqlExpression = String.format("jsonSelect('%s')", jsonPath.getJsonPath());
+		if (jsonConstraint.isValid()) {
+			cqlExpression = String.format("jsonSelect('%s')", cqlExpression);
 		}
 
 		return getConditionalExpression(source.getDefinition(), cqlExpression);

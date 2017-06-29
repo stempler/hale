@@ -42,8 +42,6 @@ import eu.esdihumboldt.hale.common.align.model.Alignment;
 import eu.esdihumboldt.hale.common.align.model.Cell;
 import eu.esdihumboldt.hale.common.align.model.ChildContext;
 import eu.esdihumboldt.hale.common.align.model.Entity;
-import eu.esdihumboldt.hale.common.align.model.Property;
-import eu.esdihumboldt.hale.common.align.model.impl.DefaultCell;
 import eu.esdihumboldt.hale.common.core.io.report.IOReporter;
 import eu.esdihumboldt.hale.common.core.io.report.impl.IOMessageImpl;
 import eu.esdihumboldt.hale.common.schema.model.PropertyDefinition;
@@ -58,7 +56,6 @@ import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.Sour
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.TypeMappingsPropertyType.FeatureTypeMapping;
 import eu.esdihumboldt.hale.io.appschema.model.FeatureChaining;
 import eu.esdihumboldt.hale.io.appschema.mongodb.CollectionLinkHandler;
-import eu.esdihumboldt.hale.io.appschema.mongodb.Utils;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingContext;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingWrapper;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.PropertyTransformationHandler;
@@ -553,12 +550,14 @@ public class AppSchemaMappingGenerator {
 			IOReporter reporter) {
 
 		// check if need to do a recursive mapping where possible
-		if (Utils.recursiveMapping(typeCell)) {
-			// add mappings for properties that have the same name
-			Property source = Utils.getFirstEntity(typeCell.getSource(), Utils::convertToProperty);
-			Property target = Utils.getFirstEntity(typeCell.getTarget(), Utils::convertToProperty);
-			Cell cell = new DefaultCell();
-		}
+		// if (Utils.recursiveMapping(typeCell)) {
+		// add mappings for properties that have the same name
+		// Property source = Utils.getFirstEntity(typeCell.getSource(),
+		// Utils::convertToProperty);
+		// Property target = Utils.getFirstEntity(typeCell.getTarget(),
+		// Utils::convertToProperty);
+		// Cell cell = new DefaultCell();
+		// }
 
 		String typeTransformId = typeCell.getTransformationIdentifier();
 		TypeTransformationHandler typeTransformHandler = null;

@@ -21,9 +21,11 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		Property source = Utils.getFirstEntity(typeCell.getSource(), Utils::convertToProperty);
 		Property target = Utils.getFirstEntity(typeCell.getTarget(), Utils::convertToProperty);
 		TypeDefinition targetType = Utils.getXmlPropertyType(target);
-		FeatureTypeMapping nested = mapping.getOrCreateFeatureTypeMapping(targetType);
 		JsonPathConstraint jsonPath = source.getDefinition().getDefinition().getPropertyType()
 				.getConstraint(JsonPathConstraint.class);
+		FeatureTypeMapping nested = mapping.getOrCreateFeatureTypeMapping(targetType, null);
+		nested.setSourceType(jsonPath.getRootKey());
+		// nested.setMappingName(jsonPath.getJsonPath());
 		AttributeMappingType containerJoinMapping = mapping.getOrCreateAttributeMapping(
 				target.getDefinition().getType(), null, target.getDefinition().getPropertyPath());
 		containerJoinMapping.setTargetAttribute(mapping.buildAttributeXPath(
@@ -35,7 +37,7 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		context.getFeatureChaining().putChain(jsonPath.getJsonPath(), 0, cg);
 		AttributeExpressionMappingType containerSourceExpr = new AttributeExpressionMappingType();
 		// join column extracted from join condition
-		containerSourceExpr.setOCQL(String.format("collectionLink('%s')", jsonPath.getJsonPath()));
+		containerSourceExpr.setOCQL(String.format("collectionLink('%s')", jsonPath.getKey()));
 		containerSourceExpr.setLinkElement(getLinkElementValue(nested));
 		String linkField = mapping.getUniqueFeatureLinkAttribute(source.getDefinition().getType(),
 				"nestedFTMapping.getMappingName()");
@@ -44,7 +46,7 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		AttributeMappingType nestedJoinMapping = new AttributeMappingType();
 		AttributeExpressionMappingType nestedSourceExpr = new AttributeExpressionMappingType();
 		// join column extracted from join condition
-		nestedSourceExpr.setOCQL(String.format("collectionLink('%s')", jsonPath.getJsonPath()));
+		nestedSourceExpr.setOCQL("nestedCollectionLink()");
 		nestedJoinMapping.setSourceExpression(nestedSourceExpr);
 		nestedJoinMapping.setTargetAttribute(linkField);
 		nested.getAttributeMappings().getAttributeMapping().add(nestedJoinMapping);

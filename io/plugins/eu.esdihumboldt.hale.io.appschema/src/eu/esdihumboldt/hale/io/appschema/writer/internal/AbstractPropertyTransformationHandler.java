@@ -67,8 +67,8 @@ import eu.esdihumboldt.hale.io.xsd.constraint.XmlAttributeFlag;
  * 
  * @author Stefano Costa, GeoSolutions
  */
-public abstract class AbstractPropertyTransformationHandler implements
-		PropertyTransformationHandler {
+public abstract class AbstractPropertyTransformationHandler
+		implements PropertyTransformationHandler {
 
 	private static final ALogger log = ALoggerFactory
 			.getLogger(AbstractPropertyTransformationHandler.class);
@@ -154,6 +154,14 @@ public abstract class AbstractPropertyTransformationHandler implements
 		}
 
 		if (featureType != null) {
+			// handle MongoDB collection handling special case
+			// if (mappingName == null) {
+			// JsonPathConstraint jsonPath =
+			// AppSchemaMappingUtils.getSourceProperty(propertyCell)
+			// .getDefinition().getType().getConstraint(JsonPathConstraint.class);
+			// mappingName = jsonPath.getJsonPath();
+			// }
+
 			// fetch FeatureTypeMapping from mapping configuration
 			this.featureTypeMapping = mapping.getOrCreateFeatureTypeMapping(featureType,
 					mappingName);
@@ -342,12 +350,13 @@ public abstract class AbstractPropertyTransformationHandler implements
 				// set targetAttribute if empty
 				if (attributeMapping.getTargetAttribute() == null
 						|| attributeMapping.getTargetAttribute().isEmpty()) {
-					attributeMapping.setTargetAttribute(mapping.buildAttributeXPath(featureType,
-							parentPropertyPath));
+					attributeMapping.setTargetAttribute(
+							mapping.buildAttributeXPath(featureType, parentPropertyPath));
 				}
 
-				Namespace targetPropNS = mapping.getOrCreateNamespace(targetPropertyDef.getName()
-						.getNamespaceURI(), targetPropertyDef.getName().getPrefix());
+				Namespace targetPropNS = mapping.getOrCreateNamespace(
+						targetPropertyDef.getName().getNamespaceURI(),
+						targetPropertyDef.getName().getPrefix());
 				String unqualifiedName = targetPropertyDef.getName().getLocalPart();
 				boolean isQualified = targetPropNS != null
 						&& !Strings.isNullOrEmpty(targetPropNS.getPrefix());
@@ -355,8 +364,8 @@ public abstract class AbstractPropertyTransformationHandler implements
 				// encode attribute as <ClientProperty>
 				ClientProperty clientProperty = new ClientProperty();
 				@SuppressWarnings("null")
-				String clientPropName = (isQualified) ? targetPropNS.getPrefix() + ":"
-						+ unqualifiedName : unqualifiedName;
+				String clientPropName = (isQualified)
+						? targetPropNS.getPrefix() + ":" + unqualifiedName : unqualifiedName;
 				clientProperty.setName(clientPropName);
 				clientProperty.setValue(getSourceExpressionAsCQL());
 				setEncodeIfEmpty(clientProperty);
@@ -398,8 +407,8 @@ public abstract class AbstractPropertyTransformationHandler implements
 					targetPropertyEntityDef.getPropertyPath());
 			List<ChildContext> targetPropertyPath = targetPropertyEntityDef.getPropertyPath();
 			// set target attribute
-			attributeMapping.setTargetAttribute(mapping.buildAttributeXPath(featureType,
-					targetPropertyPath));
+			attributeMapping.setTargetAttribute(
+					mapping.buildAttributeXPath(featureType, targetPropertyPath));
 		}
 
 		// set source expression
@@ -443,8 +452,8 @@ public abstract class AbstractPropertyTransformationHandler implements
 		QName geomTypeName = geometryType.getName();
 		Namespace geomNS = mapping.getOrCreateNamespace(geomTypeName.getNamespaceURI(),
 				geomTypeName.getPrefix());
-		attributeMapping.setTargetAttributeNode(geomNS.getPrefix() + ":"
-				+ geomTypeName.getLocalPart());
+		attributeMapping
+				.setTargetAttributeNode(geomNS.getPrefix() + ":" + geomTypeName.getLocalPart());
 
 		// set target attribute to parent (should be gml:AbstractGeometry)
 		// TODO: this is really ugly, but I don't see a better way to do it
@@ -456,8 +465,8 @@ public abstract class AbstractPropertyTransformationHandler implements
 		Definition<?> parentDef = parentEntityDef.getDefinition();
 		String parentQName = geomNS.getPrefix() + ":" + parentDef.getDisplayName();
 		List<ChildContext> targetPropertyPath = parentEntityDef.getPropertyPath();
-		attributeMapping.setTargetAttribute(mapping.buildAttributeXPath(featureType,
-				targetPropertyPath) + "/" + parentQName);
+		attributeMapping.setTargetAttribute(
+				mapping.buildAttributeXPath(featureType, targetPropertyPath) + "/" + parentQName);
 	}
 
 	/**

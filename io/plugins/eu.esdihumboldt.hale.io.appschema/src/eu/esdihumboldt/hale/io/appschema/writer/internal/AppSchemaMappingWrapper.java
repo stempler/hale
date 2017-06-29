@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.xml.namespace.QName;
+
 import com.google.common.base.Joiner;
 
 import eu.esdihumboldt.hale.common.align.model.ChildContext;
@@ -166,7 +168,8 @@ public class AppSchemaMappingWrapper {
 				// update prefix if provided prefix is not empty and currently
 				// assigned prefix was made up
 				Namespace ns = namespaceUriMap.get(namespaceURI);
-				if (prefix != null && !prefix.isEmpty() && ns.getPrefix().startsWith(defaultPrefix)) {
+				if (prefix != null && !prefix.isEmpty()
+						&& ns.getPrefix().startsWith(defaultPrefix)) {
 					// // check prefix is unique
 					// if (!namespacePrefixMap.containsKey(prefix)) {
 					// remove old prefix-NS mapping from namespacePrefixMap
@@ -332,8 +335,14 @@ public class AppSchemaMappingWrapper {
 			// targetType.getDisplayName():
 			// isn't there a more elegant (and perhaps more reliable) way to
 			// know which element corresponds to a type?
-			featureTypeMapping.setTargetElement(targetType.getName().getPrefix() + ":"
-					+ targetType.getDisplayName());
+			QName targetName = targetType.getName();
+			String prefix = targetName.getPrefix();
+			if (prefix == null || prefix.isEmpty()) {
+				Namespace ns = getOrCreateNamespace(targetName.getNamespaceURI(),
+						targetName.getPrefix());
+				prefix = ns.getPrefix();
+			}
+			featureTypeMapping.setTargetElement(prefix + ":" + targetType.getDisplayName());
 			if (mappingName != null && !mappingName.isEmpty()) {
 				featureTypeMapping.setMappingName(mappingName);
 			}
@@ -354,7 +363,8 @@ public class AppSchemaMappingWrapper {
 		return hashBase.hashCode();
 	}
 
-	private void addToFeatureTypeMappings(TypeDefinition targetType, FeatureTypeMapping typeMapping) {
+	private void addToFeatureTypeMappings(TypeDefinition targetType,
+			FeatureTypeMapping typeMapping) {
 		Map<String, Set<FeatureTypeMapping>> mappingsByTargetElement = null;
 		if (AppSchemaMappingUtils.isFeatureType(targetType)) {
 			mappingsByTargetElement = featureTypesByTargetElement;
