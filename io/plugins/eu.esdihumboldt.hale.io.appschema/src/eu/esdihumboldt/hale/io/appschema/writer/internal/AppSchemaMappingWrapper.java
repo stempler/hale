@@ -475,9 +475,9 @@ public class AppSchemaMappingWrapper {
 	 */
 	public AttributeMappingType getOrCreateAttributeMapping(TypeDefinition owningType,
 			String mappingName, List<ChildContext> propertyPath) {
-		if (propertyPath == null || propertyPath.isEmpty()) {
-			return null;
-		}
+		// if (propertyPath == null || propertyPath.isEmpty()) {
+		// return null;
+		// }
 
 		Integer hashKey = getAttruteMappingHashKey(owningType, propertyPath);
 		if (!attributeMappings.containsKey(hashKey)) {
@@ -499,12 +499,17 @@ public class AppSchemaMappingWrapper {
 
 		if (owningType != null) {
 			pathBuilder.append(owningType.getName().toString()).append(SEPARATOR);
-			for (ChildContext childContext : propertyPath) {
-				pathBuilder.append(childContext.getChild().getName().toString());
-				if (childContext.getContextName() != null) {
-					pathBuilder.append(childContext.getContextName());
+			if (propertyPath == null || propertyPath.isEmpty()) {
+				pathBuilder.append(UUID.randomUUID().toString());
+			}
+			else {
+				for (ChildContext childContext : propertyPath) {
+					pathBuilder.append(childContext.getChild().getName().toString());
+					if (childContext.getContextName() != null) {
+						pathBuilder.append(childContext.getContextName());
+					}
+					pathBuilder.append(SEPARATOR);
 				}
-				pathBuilder.append(SEPARATOR);
 			}
 		}
 		else {

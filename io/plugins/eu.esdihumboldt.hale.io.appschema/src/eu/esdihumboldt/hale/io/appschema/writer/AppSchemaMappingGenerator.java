@@ -47,8 +47,11 @@ import eu.esdihumboldt.hale.common.core.io.report.impl.IOMessageImpl;
 import eu.esdihumboldt.hale.common.schema.model.PropertyDefinition;
 import eu.esdihumboldt.hale.common.schema.model.Schema;
 import eu.esdihumboldt.hale.common.schema.model.SchemaSpace;
+import eu.esdihumboldt.hale.common.schema.model.TypeDefinition;
 import eu.esdihumboldt.hale.io.appschema.AppSchemaIO;
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.AppSchemaDataAccessType;
+import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.AttributeExpressionMappingType;
+import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.AttributeMappingType;
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.NamespacesPropertyType.Namespace;
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.ObjectFactory;
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.SourceDataStoresPropertyType.DataStore;
@@ -56,6 +59,7 @@ import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.Sour
 import eu.esdihumboldt.hale.io.appschema.impl.internal.generated.app_schema.TypeMappingsPropertyType.FeatureTypeMapping;
 import eu.esdihumboldt.hale.io.appschema.model.FeatureChaining;
 import eu.esdihumboldt.hale.io.appschema.mongodb.CollectionLinkHandler;
+import eu.esdihumboldt.hale.io.appschema.mongodb.Utils;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingContext;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingWrapper;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.PropertyTransformationHandler;
@@ -69,6 +73,7 @@ import eu.esdihumboldt.hale.io.geoserver.Layer;
 import eu.esdihumboldt.hale.io.geoserver.ResourceBuilder;
 import eu.esdihumboldt.hale.io.geoserver.Workspace;
 import eu.esdihumboldt.hale.io.mongo.CollectionLinkFunction;
+import eu.esdihumboldt.hale.io.mongo.JsonPathConstraint;
 
 /**
  * Translates a HALE alignment to an app-schema mapping configuration.
@@ -567,6 +572,26 @@ public class AppSchemaMappingGenerator {
 					.createTypeTransformationHandler(typeTransformId);
 			FeatureTypeMapping ftMapping = typeTransformHandler.handleTypeTransformation(typeCell,
 					context);
+
+			// add randomID for MongoDB types
+			TypeDefinition sourceType = Utils
+					.getFirstEntity(typeCell.getSource(), (entity) -> entity).getDefinition()
+					.getType();
+			TypeDefinition targetType = Utils
+					.getFirstEntity(typeCell.getTarget(), (entity) -> entity).getDefinition()
+					.getType();
+			JsonPathConstraint jsonConstraint = sourceType.getConstraint(JsonPathConstraint.class);
+
+			if (!jsonConstraint.isValid()) {
+				// add collection id to the container
+				AttributeMappingType attributeMapping = mappingWrapper
+						.getOrCreateAttributeMapping(targetType, null, null);
+				attributeMapping.setTargetAttribute(ftMapping.getTargetElement());
+				// set id expression
+				AttributeExpressionMappingType idExpression = new AttributeExpressionMappingType();
+				idExpression.setOCQL("collectionId()");
+				attributeMapping.setIdExpression(idExpression);
+			}
 
 			if (ftMapping != null) {
 				Collection<? extends Cell> propertyCells = alignment.getPropertyCells(typeCell);

@@ -10,7 +10,6 @@ import eu.esdihumboldt.hale.io.appschema.model.ChainConfiguration;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingContext;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.AppSchemaMappingWrapper;
 import eu.esdihumboldt.hale.io.appschema.writer.internal.TypeTransformationHandler;
-import eu.esdihumboldt.hale.io.mongo.JsonPathConstraint;
 
 public class CollectionLinkHandler implements TypeTransformationHandler {
 
@@ -21,10 +20,9 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		Property source = Utils.getFirstEntity(typeCell.getSource(), Utils::convertToProperty);
 		Property target = Utils.getFirstEntity(typeCell.getTarget(), Utils::convertToProperty);
 		TypeDefinition targetType = Utils.getXmlPropertyType(target);
-		JsonPathConstraint jsonPath = source.getDefinition().getDefinition().getPropertyType()
-				.getConstraint(JsonPathConstraint.class);
+		String jsonPath = Utils.getRelativeJsonPath(source);
 		FeatureTypeMapping nested = mapping.getOrCreateFeatureTypeMapping(targetType, null);
-		nested.setSourceType(jsonPath.getRootKey());
+		nested.setSourceType(jsonPath);
 		// nested.setMappingName(jsonPath.getJsonPath());
 		AttributeMappingType containerJoinMapping = mapping.getOrCreateAttributeMapping(
 				target.getDefinition().getType(), null, target.getDefinition().getPropertyPath());
@@ -34,10 +32,10 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		containerJoinMapping.setIsMultiple(true);
 		ChainConfiguration cg = new ChainConfiguration();
 		cg.setNestedTypeTarget(target.getDefinition());
-		context.getFeatureChaining().putChain(jsonPath.getJsonPath(), 0, cg);
+		context.getFeatureChaining().putChain(jsonPath, 0, cg);
 		AttributeExpressionMappingType containerSourceExpr = new AttributeExpressionMappingType();
 		// join column extracted from join condition
-		containerSourceExpr.setOCQL(String.format("collectionLink('%s')", jsonPath.getKey()));
+		containerSourceExpr.setOCQL(String.format("collectionLink('%s')", jsonPath));
 		containerSourceExpr.setLinkElement(getLinkElementValue(nested));
 		String linkField = mapping.getUniqueFeatureLinkAttribute(source.getDefinition().getType(),
 				"nestedFTMapping.getMappingName()");
@@ -50,6 +48,17 @@ public class CollectionLinkHandler implements TypeTransformationHandler {
 		nestedJoinMapping.setSourceExpression(nestedSourceExpr);
 		nestedJoinMapping.setTargetAttribute(linkField);
 		nested.getAttributeMappings().getAttributeMapping().add(nestedJoinMapping);
+
+		// add collection id to the container
+		AttributeMappingType attributeMapping = mapping.getOrCreateAttributeMapping(targetType,
+				null, null);
+		attributeMapping.setTargetAttribute(nested.getTargetElement());
+		// set id expression
+		AttributeExpressionMappingType idExpression = new AttributeExpressionMappingType();
+		idExpression.setOCQL("collectionId()");
+		attributeMapping.setIdExpression(idExpression);
+
+		// return nested feature type definition
 		return nested;
 	}
 

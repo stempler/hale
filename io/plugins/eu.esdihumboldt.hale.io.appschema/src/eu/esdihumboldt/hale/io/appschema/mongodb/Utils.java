@@ -3,6 +3,8 @@ package eu.esdihumboldt.hale.io.appschema.mongodb;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.ListMultimap;
 
 import eu.esdihumboldt.hale.common.align.model.Cell;
@@ -14,6 +16,7 @@ import eu.esdihumboldt.hale.common.schema.model.ChildDefinition;
 import eu.esdihumboldt.hale.common.schema.model.PropertyDefinition;
 import eu.esdihumboldt.hale.common.schema.model.TypeDefinition;
 import eu.esdihumboldt.hale.common.schema.model.impl.AbstractPropertyDecorator;
+import eu.esdihumboldt.hale.io.mongo.JsonPathConstraint;
 import eu.esdihumboldt.hale.io.xsd.reader.internal.XmlElementReferenceProperty;
 
 public final class Utils {
@@ -79,8 +82,25 @@ public final class Utils {
 			if (propertyDefinition instanceof XmlElementReferenceProperty) {
 				return propertyType;
 			}
+			isAbstract = propertyDefinition instanceof AbstractPropertyDecorator;
 		}
 		// not a reference
 		return null;
+	}
+
+	public static String getRelativeJsonPath(Property source) {
+		JsonPathConstraint propertyConstraint = source.getDefinition().getDefinition()
+				.getConstraint(JsonPathConstraint.class);
+		if (!propertyConstraint.isValid()) {
+			return null;
+		}
+		JsonPathConstraint typeConstraint = source.getDefinition().getType()
+				.getConstraint(JsonPathConstraint.class);
+		String rootJsonPath = typeConstraint.getJsonPath();
+		String propertyJsonPath = propertyConstraint.getJsonPath();
+		if (rootJsonPath == null || propertyJsonPath == null) {
+			return propertyJsonPath;
+		}
+		return StringUtils.removeStart(propertyJsonPath, rootJsonPath + ".");
 	}
 }
