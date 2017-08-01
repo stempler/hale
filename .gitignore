@@ -21,6 +21,7 @@ target/
 pom.xml
 .metadata/
 .recommenders/
+/.gradle/
 
 # generic main project
 /.project
