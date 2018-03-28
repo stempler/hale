@@ -24,6 +24,11 @@ import java.net.URI;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import eu.esdihumboldt.hale.common.align.io.EntityResolver;
 import eu.esdihumboldt.hale.common.align.io.impl.internal.AlignmentToJaxb;
@@ -97,7 +102,7 @@ public class JaxbAlignmentIO {
 	 */
 	public static void addBaseAlignment(MutableAlignment alignment, URI newBase,
 			URI projectLocation, TypeIndex sourceTypes, TypeIndex targetTypes, IOReporter reporter)
-					throws IOException {
+			throws IOException {
 		JaxbToAlignment.addBaseAlignment(alignment, newBase, projectLocation, sourceTypes,
 				targetTypes, reporter);
 	}
@@ -172,13 +177,13 @@ public class JaxbAlignmentIO {
 	}
 
 	/**
-	 * Print a cell to an output stream (intended for tests/debugging).
+	 * Convert a cell to a JAXB object.
 	 * 
-	 * @param cell the cell to print
-	 * @param out the output stream
-	 * @throws Exception if an error occurs trying to print the cell
+	 * @param cell the cell to convert
+	 * @return the JAXB object representing the cell
+	 * @throws Exception if an error occurs trying to convert the cell
 	 */
-	public static void printCell(MutableCell cell, OutputStream out) throws Exception {
+	public static CellType convert(MutableCell cell) throws Exception {
 		DefaultAlignment alignment = new DefaultAlignment();
 		alignment.addCell(cell);
 
@@ -193,7 +198,18 @@ public class JaxbAlignmentIO {
 		PathUpdate pathUpdate = new PathUpdate(null, null);
 
 		AlignmentType at = convert(alignment, reporter, pathUpdate);
-		CellType ct = (CellType) at.getCellOrModifier().get(0);
+		return (CellType) at.getCellOrModifier().get(0);
+	}
+
+	/**
+	 * Print a cell to an output stream (intended for tests/debugging).
+	 * 
+	 * @param cell the cell to print
+	 * @param out the output stream
+	 * @throws Exception if an error occurs trying to print the cell
+	 */
+	public static void printCell(MutableCell cell, OutputStream out) throws Exception {
+		CellType ct = convert(cell);
 
 		JAXBContext jc = JAXBContext.newInstance(ALIGNMENT_CONTEXT,
 				ObjectFactory.class.getClassLoader());
@@ -208,5 +224,29 @@ public class JaxbAlignmentIO {
 			out.flush();
 			out.close();
 		}
+	}
+
+	/**
+	 * Convert a cell to a DOM element.
+	 * 
+	 * @param cell the cell to convert
+	 * @return the DOM element representing the cell
+	 * @throws Exception if an error occurs trying to print the cell
+	 */
+	public static Element toDom(MutableCell cell) throws Exception {
+		CellType ct = convert(cell);
+
+		JAXBContext jc = JAXBContext.newInstance(ALIGNMENT_CONTEXT,
+				ObjectFactory.class.getClassLoader());
+
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+
+		Marshaller m = jc.createMarshaller();
+
+		ObjectFactory of = new ObjectFactory();
+		m.marshal(of.createCell(ct), document);
+		return document.getDocumentElement();
 	}
 }
