@@ -46,12 +46,15 @@ import eu.esdihumboldt.hale.common.schema.model.impl.DefaultPropertyDefinition;
 import eu.esdihumboldt.hale.common.schema.model.impl.DefaultSchema;
 import eu.esdihumboldt.hale.common.schema.model.impl.DefaultTypeDefinition;
 import mil.nga.geopackage.GeoPackage;
+import mil.nga.geopackage.attributes.AttributesDao;
 import mil.nga.geopackage.core.srs.SpatialReferenceSystem;
 import mil.nga.geopackage.db.GeoPackageDataType;
 import mil.nga.geopackage.features.columns.GeometryColumns;
 import mil.nga.geopackage.features.user.FeatureColumn;
 import mil.nga.geopackage.features.user.FeatureDao;
-import mil.nga.geopackage.features.user.FeatureTable;
+import mil.nga.geopackage.user.UserColumn;
+import mil.nga.geopackage.user.UserDao;
+import mil.nga.geopackage.user.UserTable;
 
 /**
  * Class that derives a hale schema from a {@link GeoPackage}.
@@ -106,12 +109,19 @@ public class GeopackageSchemaBuilder {
 			}
 		});
 
+		tables = gpkg.getAttributesTables();
+
+		tables.stream().forEach(table -> {
+			AttributesDao attributes = gpkg.getAttributesDao(table);
+			schema.addType(buildType(attributes, null, schema));
+		});
+
 		return schema;
 	}
 
-	private TypeDefinition buildType(FeatureDao features, GeometryColumns geomColumns,
+	private TypeDefinition buildType(UserDao<?, ?, ?, ?> dao, GeometryColumns geomColumns,
 			DefaultSchema schema) {
-		QName name = new QName(defaultNamespace, features.getTableName());
+		QName name = new QName(defaultNamespace, dao.getTableName());
 		DefaultTypeDefinition type = new DefaultTypeDefinition(name);
 
 		type.setConstraint(MappableFlag.ENABLED);
@@ -120,10 +130,10 @@ public class GeopackageSchemaBuilder {
 		type.setConstraint(AbstractFlag.DISABLED);
 		type.setConstraint(Binding.get(Instance.class));
 
-		FeatureTable table = features.getTable();
+		UserTable<? extends UserColumn> table = dao.getTable();
 
 		for (String columnName : table.getColumnNames()) {
-			FeatureColumn column = table.getColumn(columnName);
+			UserColumn column = table.getColumn(columnName);
 
 			QName propertyName = new QName(columnName);
 
@@ -144,12 +154,12 @@ public class GeopackageSchemaBuilder {
 		return type;
 	}
 
-	private TypeDefinition getOrCreatePropertyType(FeatureColumn column,
-			GeometryColumns geomColumns, DefaultSchema schema) {
+	private TypeDefinition getOrCreatePropertyType(UserColumn column, GeometryColumns geomColumns,
+			DefaultSchema schema) {
 		String localName;
 
-		if (column.isGeometry()) {
-			localName = column.getGeometryType().getName();
+		if (column instanceof FeatureColumn && ((FeatureColumn) column).isGeometry()) {
+			localName = ((FeatureColumn) column).getGeometryType().getName();
 		}
 		else {
 			localName = column.getDataType().name();
@@ -169,8 +179,8 @@ public class GeopackageSchemaBuilder {
 			typeDef.setConstraint(MappableFlag.DISABLED);
 			typeDef.setConstraint(HasValueFlag.ENABLED); // simple type
 
-			if (column.isGeometry()) {
-				mil.nga.sf.GeometryType geomType = column.getGeometryType();
+			if (column instanceof FeatureColumn && ((FeatureColumn) column).isGeometry()) {
+				mil.nga.sf.GeometryType geomType = ((FeatureColumn) column).getGeometryType();
 
 				typeDef.setConstraint(Binding.get(GeometryProperty.class));
 
