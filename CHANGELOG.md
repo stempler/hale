@@ -1,3 +1,10 @@
+## [5.3.0](https://github.com/stempler/hale/compare/v5.2.0...v5.3.0) (2024-05-10)
+
+
+### Features
+
+* dummy feature ([544635a](https://github.com/stempler/hale/commit/544635a006c5de119a049fa42c437aaac1e8de1c)), closes [#7](https://github.com/stempler/hale/issues/7)
+
 ## [5.2.0](https://github.com/stempler/hale/compare/v5.1.0...v5.2.0) (2024-05-09)
 
 
