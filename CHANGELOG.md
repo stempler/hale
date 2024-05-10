@@ -1,3 +1,10 @@
+## [5.3.1](https://github.com/stempler/hale/compare/v5.3.0...v5.3.1) (2024-05-10)
+
+
+### Bug Fixes
+
+* a fix ([59906dc](https://github.com/stempler/hale/commit/59906dcccb194c5821865430c314b214d52eb4d2))
+
 ## [5.3.0](https://github.com/stempler/hale/compare/v5.2.0...v5.3.0) (2024-05-10)
 
 
