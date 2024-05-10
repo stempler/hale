@@ -1,9 +1,3 @@
-General rules
-=============
-
-* HALE releases should always be done on the *release* branch
-* Release specific changes (e.g. excluded features) should not be merged into the *master* branch (only merge from *master* into *release*, not vice versa)
-
 Before proceeding with the release steps
 ========================================
 
